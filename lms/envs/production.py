@@ -1057,3 +1057,10 @@ CHROME_DISABLE_SUBFRAME_DIALOG_SUPPRESSION_TOKEN = ENV_TOKENS.get(
 
 ############## DRF overrides ##############
 REST_FRAMEWORK.update(ENV_TOKENS.get('REST_FRAMEWORK', {}))
+
+# New variable named LOGOUT_REDIRECT_URL which can be used as default redirection-url instead of dashboard.
+LOGOUT_REDIRECT_URL = ENV_TOKENS.get(
+    'LOGOUT_REDIRECT_URL',
+    None
+)
+
