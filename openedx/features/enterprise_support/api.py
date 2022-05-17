@@ -42,6 +42,7 @@ try:
         EnterpriseCustomerUser,
         PendingEnterpriseCustomerUser
     )
+    from consent.helpers import get_course_data_sharing_consent
 except ImportError:  # pragma: no cover
     pass
 
@@ -110,6 +111,7 @@ class ConsentApiClient:
 
         # Call the endpoint with the given kwargs, and check the value that it provides.
         response = self.client.get(self.consent_endpoint, params=kwargs)
+        # import pdb ; pdb.set_trace()
         response.raise_for_status()
         response = response.json()
 
@@ -351,6 +353,7 @@ def data_sharing_consent_required(view_func):
 
         Otherwise, just call the wrapped view function.
         """
+        # import pdb ; pdb.set_trace()
         # Redirect to the consent URL, if consent is required.
         consent_url = get_enterprise_consent_url(request, course_id, enrollment_exists=True)
         if consent_url:
@@ -510,11 +513,6 @@ def enterprise_customer_uuid_for_request(request):
                 enterprise_customer_identity_providers__provider_id=sso_provider_id
             ).uuid
         except EnterpriseCustomer.DoesNotExist:
-            LOGGER.info(
-                '[ENTERPRISE DSC] Customer not found using SSO Provider ID. User: [%s], SSOProviderID: [%s]',
-                request.user.username,
-                sso_provider_id
-            )
             enterprise_customer_uuid = None
     else:
         enterprise_customer_uuid = _customer_uuid_from_query_param_cookies_or_session(request)
@@ -561,15 +559,29 @@ def _customer_uuid_from_query_param_cookies_or_session(request):
     ):
         enterprise_customer_uuid = function(request)
         if enterprise_customer_uuid is not _CACHE_MISS:
-            LOGGER.info(
-                '[ENTERPRISE DSC] Customer Info. User: [%s], Function: [%s], UUID: [%s]',
-                request.user.username,
-                function,
-                enterprise_customer_uuid
-            )
             return enterprise_customer_uuid
 
     return _CACHE_MISS
+
+
+def get_data_sharing_consent_info(username, enterprise_customer_uuid, course_key, enrollment_exists):
+    """
+    Return data sharing consent record for an enterprise learner.
+    """
+    dsc = get_course_data_sharing_consent(
+        username,
+        course_key,
+        enterprise_customer_uuid,
+    )
+
+    if dsc:
+        dsc_info = dsc.serialize()
+
+        # Learner is already enrolled in a course but no enterprise record exists so consent is not needed.
+        if enrollment_exists and not dsc_info.get('exists', False):
+            return False
+
+        return dsc_info['consent_required']
 
 
 @enterprise_is_enabled()
@@ -581,118 +593,45 @@ def enterprise_customer_for_request(request):
     enterprise_customer = enterprise_customer_from_session(request)
     if enterprise_customer is _CACHE_MISS:
         enterprise_customer = enterprise_customer_from_api(request)
-        LOGGER.info(
-            '[ENTERPRISE DSC] Updating Session. User: [%s], UserAuthenticated: [%s], EnterpriseCustomer: [%s]',
-            request.user.username,
-            request.user.is_authenticated,
-            enterprise_customer
-        )
         add_enterprise_customer_to_session(request, enterprise_customer)
     return enterprise_customer
 
 
 @enterprise_is_enabled(otherwise=False)
-def consent_needed_for_course(request, user, course_id, enrollment_exists=False):
+def consent_needed_for_course(request, user, course_key, enrollment_exists=False):
     """
     Wrap the enterprise app check to determine if the user needs to grant
     data sharing permissions before accessing a course.
     """
-    LOGGER.info(
-        "Determining if user [{username}] must consent to data sharing for course [{course_id}]".format(
-            username=user.username,
-            course_id=course_id
-        )
-    )
-
     enterprise_learner_details = get_enterprise_learner_data_from_db(user)
-    enterprise_customer_uuid = None
-    if enterprise_learner_details:
-        enterprise_customer = enterprise_learner_details[0]['enterprise_customer']
-        enterprise_customer_uuid = enterprise_customer['uuid']
+    # first record in `enterprise_learner_details` list contains details about the learner's
+    # currently active enterprise and we only have to deal with it
+    enterprise_customer = enterprise_learner_details and enterprise_learner_details[0]['enterprise_customer']
 
-    consent_cache_key = get_data_consent_share_cache_key(user.id, course_id, enterprise_customer_uuid)
-    data_sharing_consent_needed_cache = TieredCache.get_cached_response(consent_cache_key)
-    if data_sharing_consent_needed_cache.is_found and data_sharing_consent_needed_cache.value == 0:
-        LOGGER.info(
-            "Consent from user [{username}] is not needed for course [{course_id}]. The DSC cache was checked,"
-            " and the value was 0.".format(
-                username=user.username,
-                course_id=course_id
-            )
-        )
+    if not enterprise_customer:
+        # learner is not linked with any enterprise so no need to move forward
         return False
 
+    if enterprise_customer['enable_data_sharing_consent'] == False:
+        # enterprise has disabled the DSC so no need to move forward
+        return False
+
+    # this is the data we need consent for
+    learner_consent_input_data = (user.username, enterprise_customer['uuid'], course_key)
+
+    # check if learner has already given the consent for this course and enterprise
+    existing_dsc_records = enterprise_learner_details[0]['data_sharing_consent_records']
+    for dsc in existing_dsc_records:
+        if (dsc['username'], str(dsc['enterprise_customer_uuid']), dsc['course_id']) == learner_consent_input_data:
+            return False
+
     consent_needed = False
-    if not enterprise_learner_details:
-        LOGGER.info(
-            "Consent from user [{username}] is not needed for course [{course_id}]. The user is not linked to an"
-            " enterprise.".format(
-                username=user.username,
-                course_id=course_id
-            )
+    enterprise_and_learner_have_same_domain = Site.objects.get(domain=enterprise_customer['site']['domain']) == request.site
+    if enterprise_and_learner_have_same_domain:
+        consent_needed = get_data_sharing_consent_info(
+            **learner_consent_input_data,
+            enrollment_exists,
         )
-    else:
-        client = ConsentApiClient(user=request.user)
-        current_enterprise_uuid = enterprise_customer_uuid_for_request(request)
-        consent_needed = any(
-            str(current_enterprise_uuid) == str(learner['enterprise_customer']['uuid'])
-            and Site.objects.get(domain=learner['enterprise_customer']['site']['domain']) == request.site
-            and client.consent_required(
-                username=user.username,
-                course_id=course_id,
-                enterprise_customer_uuid=current_enterprise_uuid,
-                enrollment_exists=enrollment_exists,
-            )
-            for learner in enterprise_learner_details
-        )
-
-        if not consent_needed:
-            # TODO: https://openedx.atlassian.net/browse/ENT-3724
-            # this whole code branch seems to do nothing other than log some misleading info:
-            # the consent requirement doesn't actually fail.  If there's an enterprise or site mismatch,
-            # we'll still end up in the else branch of "if consent_needed:" below, where
-            # we'll log that consent is not needed, and ultimately, return False.
-            # Are we supposed to raise some exceptions in here?
-            enterprises = [str(learner['enterprise_customer']['uuid']) for learner in enterprise_learner_details]
-
-            if str(current_enterprise_uuid) not in enterprises:
-                LOGGER.info(  # pragma: no cover
-                    '[ENTERPRISE DSC] Enterprise mismatch. USER: [%s], CurrentEnterprise: [%s], UserEnterprises: [%s]',
-                    user.username,
-                    current_enterprise_uuid,
-                    enterprises
-                )
-            else:
-                domains = [learner['enterprise_customer']['site']['domain'] for learner in enterprise_learner_details]
-                if not Site.objects.filter(domain__in=domains).filter(id=request.site.id).exists():
-                    LOGGER.info(  # pragma: no cover
-                        '[ENTERPRISE DSC] Site mismatch. USER: [%s], RequestSite: [%s], LearnerEnterpriseDomains: [%s]',
-                        user.username,
-                        request.site,
-                        domains
-                    )
-
-        if consent_needed:
-            LOGGER.info(
-                "Consent from user [{username}] is needed for course [{course_id}]. The user's current enterprise"
-                " required data sharing consent, and it has not been given.".format(
-                    username=user.username,
-                    course_id=course_id
-                )
-            )
-        else:
-            LOGGER.info(
-                "Consent from user [{username}] is not needed for course [{course_id}]. The user's current enterprise "
-                "does not require data sharing consent.".format(
-                    username=user.username,
-                    course_id=course_id
-                )
-            )
-
-    if not consent_needed:
-        # Set an ephemeral item in the cache to prevent us from needing
-        # to make a Consent API request every time this function is called.
-        TieredCache.set_all_tiers(consent_cache_key, 0, settings.DATA_CONSENT_SHARE_CACHE_TIMEOUT)
 
     return consent_needed
 
@@ -733,6 +672,7 @@ def get_enterprise_consent_url(request, course_id, user=None, return_to=None, en
     * return_to: url name label for the page to return to after consent is granted.
                  If None, return to request.path instead.
     """
+    # import pdb ; pdb.set_trace()
     user = user or request.user
 
     LOGGER.info(
