@@ -148,6 +148,7 @@ from common.djangoapps.student.models import CourseEnrollment
 <main id="main" aria-label="Content" tabindex="-1">
     <div class="dashboard" id="dashboard-main">
       <div class="main-container">
+        <div class="gses-dashboard-message"><p>Please note, recently purchased courses may take a few moments to appear. If you do not see recently purchased courses, please <a href="">click here to refresh the page</a>.</p></div>
         <div class="my-courses" id="my-courses">
           % if display_dashboard_courses:
           <%include file="learner_dashboard/_dashboard_navigation_courses.html"/>
