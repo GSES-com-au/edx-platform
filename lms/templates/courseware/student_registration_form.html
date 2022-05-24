@@ -24,7 +24,6 @@ rel='stylesheet'>
     <main id="main" aria-label="Content" tabindex="-1">
 
         <div class="container-fluid">
-
             <h1 class="container-fluid">Hands On Practical</h1><br>
             <h6 class="container-fluid para">
                 <p>Here you can book into your Hands-On Practical with New Energy Academy.</p>
@@ -53,8 +52,10 @@ rel='stylesheet'>
                 <p>A cancellation fee of $50 will apply for change-of-date or cancellation within 14 
                 days of the start date.</p>
             </h6><br>
-
-            <a class="upcoming-events" href="${reverse('event_calendar')}" target="_blank">View Upcoming Dates</a>
+            <%
+            event_calendar = reverse('event_calendar', kwargs={'course_id':course.id})
+            %>
+            <a class="upcoming-events" href="${event_calendar}" target="_blank">View Upcoming Dates</a>
 
             <h4 class="already-registered">You Have Already Registered For the event</h4>
             <h4 class="student-registered">Thank You for registering</h4>
@@ -107,10 +108,12 @@ rel='stylesheet'>
                     <label for="cars">Choose Hands On Practical date:</label>
                     <select name="practical_name" id="cars" class="form-control form-rounded">
                         % for i in queryset:
-                            <option value="${i.id}">${i.practical_name} starting Date:${i.start_date.date()}</option>
+                            <option value="${i.id}">Practical name: ${i.practical_name} starting Date:${i.start_date.date()}</option>
                         % endfor
                     </select>
                 </div><br>
+
+
                 <input type="hidden" value="${course.id}" name="course_id">
                 
                 <div class="container-fluid">
@@ -122,8 +125,8 @@ rel='stylesheet'>
     </main>
 
 
-    % else:
-<h1>These Feature is Not Currently Available</h1>
+% else:
+    <h1>These Feature is Not Currently Available</h1>
 
 % endif
 
