@@ -58,6 +58,7 @@ rel='stylesheet'>
             <a class="upcoming-events" href="${event_calendar}" target="_blank">View Upcoming Dates</a>
 
             <h4 class="already-registered">You Have Already Registered For the event</h4>
+            <h4 class="seat-fulled">Seats Are Full In These Practical</h4>
             <h4 class="student-registered">Thank You for registering</h4>
             
             <form id="registration-form" >
@@ -81,35 +82,37 @@ rel='stylesheet'>
                 </div>
 
                 <div class="form-group container-fluid">
-                    <label for="fullName">Contact Name</label>
+                    <label for="ContactName">Contact Name</label>
                     <input type="text" class="form-control form-rounded" id="contactName" placeholder="Enter Contact Name" name="ContactName">
                     <span class="contact_name errors"></span>
                 </div>
 
                 <div class="form-group container-fluid">
-                    <label for="fullName">Contact Phone Number</label>
+                    <label for="ContactPhoneNumber">Contact Phone Number</label>
                     <input type="number" class="form-control form-rounded" id="contactPhoneNumber" placeholder="Enter Contact Phone Number" name="ContactPhoneNumber">
                     <span class="contact_phone_number errors"></span>
                 </div>
 
                 <div class="form-group container-fluid">
-                    <label for="fullName">Any special dietary or other requirements (Optional)</label>
+                    <label for="OtherRequirements">Any special dietary or other requirements (Optional)</label>
                     <textarea  class="form-control form-rounded" id="otherRequirements" placeholder="Enter other requirements if any" name="OtherRequirements"></textarea>
                     <span class="other_requirements errors"></span>
                 </div>
 
                 <div class="form-group container-fluid">
-                    <label for="fullName">Any other comments (Optional)</label>
+                    <label for="Comments">Any other comments (Optional)</label>
                     <textarea class="form-control form-rounded" id="comments" placeholder="Enter Comments if any" name="Comments"></textarea>
                     <span class="other_comments errors"></span>
                 </div><br>
 
                 <div class="form-group container-fluid">
-                    <label for="cars">Choose Hands On Practical date:</label>
-                    <select name="practical_name" id="cars" class="form-control form-rounded">
-                        % for i in queryset:
-                            <option value="${i.id}">Practical name: ${i.practical_name} starting Date:${i.start_date.date()}</option>
-                        % endfor
+                    <label for="practical_name">Choose Hands On Practical date:</label>
+                    <select name="practical_name" id="practical_name" class="form-control form-rounded">
+                        % if queryset:
+                            % for i in queryset:
+                                <option value="${i.id}">Practical name: ${i.practical_name} starting Date:${i.start_date.date().strftime("%d-%m-%Y")}</option>
+                            % endfor
+                        % endif
                     </select>
                 </div><br>
 

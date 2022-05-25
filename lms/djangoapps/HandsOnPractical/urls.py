@@ -16,6 +16,9 @@ router.register('student-pratical-data',
 router.register('{}/events-data'.format(settings.COURSE_ID_PATTERN,),
                 views.DisplayCoursesListAPI, basename="events_data"),
 
+router.register('{}/maximum-students'.format(settings.COURSE_ID_PATTERN,),
+                views.DisplayMaximumStudent, basename="events_data"),
+
 urlpatterns = []
 urlpatterns += [
     re_path('api/', include(router.urls)),

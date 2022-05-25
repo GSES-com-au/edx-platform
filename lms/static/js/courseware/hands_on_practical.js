@@ -33,6 +33,9 @@ jQuery.validator.addMethod("lettersonly", function(value, element) {
               number: true,
               minlength: 10,
               maxlength: 10
+          },
+          practical_name:{
+              required: true
           }
   
       }
@@ -67,8 +70,6 @@ jQuery.validator.addMethod("lettersonly", function(value, element) {
               return obj;
           }, {});
   
-          console.log(form_data)
-  
           $.ajax({
               // ajax call to check if user is already registered
               url: "/hands-on-practical/api/student-pratical-data/",
@@ -78,15 +79,24 @@ jQuery.validator.addMethod("lettersonly", function(value, element) {
                   practical_name: form_data['practical_name']
               },
               success: function (data) {
+                  console.log(data)
                   if (data['user_exist_data']) {
                       // If User has already registered
                       $(".already-registered").css("display", "block")
                       $(".student-registered").css("display", "none")
+                      $(".seat-fulled").css("display", "none")
+                  }
+                  else if (data['seats_fulled']){
+                      // if seats are full in practical
+                      $(".seat-fulled").css("display", "block")
+                      $(".student-registered").css("display", "none")
+                      $(".already-registered").css("display", "none")
                   }
                   else {
                       // if user has not registered
-                      console.log(form_data)
+                      
                       $(".already-registered").css("display", "none")
+                      $(".seat-fulled").css("display", "none")
                       $.ajax({
                           // ajax call to save the user details for sesion
                           url: "/hands-on-practical/api/student-pratical-data/",
@@ -108,11 +118,11 @@ jQuery.validator.addMethod("lettersonly", function(value, element) {
                           success: function (data) {
                               // POST request return
                               $(".student-registered").css("display", "block")
+                              $("#registration-form").css("display", "none")
   
                           },
                           error: function (data) {
                               // to display errors if there are any
-                              console.log(data)
                               $.each(data['responseJSON'], function (key, value) {
                                   $("." + key).text(value);
                               });

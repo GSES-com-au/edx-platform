@@ -17,6 +17,9 @@ class CoursePracticalDate(TimeStampedModel):
 class FormFillingDate(TimeStampedModel):
     courseoverview = models.ForeignKey(CoursePracticalDate, db_index=True, on_delete=models.CASCADE, default='course-v1:edX+DemoX+Demo_Course')
     practical_name = models.CharField(max_length=50, default='Practical')
+    practical_description = models.TextField(max_length=250, default='description of practical')
+    maximum_students = models.IntegerField(verbose_name='Maximum Students', default=100)
+    venue = models.TextField(verbose_name='Venue', max_length=250, default='venue of practical')
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
 
@@ -37,7 +40,7 @@ class FormFillingDate(TimeStampedModel):
 
 
 class StudentConsultationList(TimeStampedModel):
-    practical_name = models.ForeignKey(FormFillingDate, on_delete=models.CASCADE, default='10')
+    practical_name = models.ForeignKey(FormFillingDate, on_delete=models.CASCADE, default='1')
     full_name = models.CharField(max_length=50)
     email = models.EmailField()
     phone_number = models.CharField(max_length=10)

@@ -9,7 +9,6 @@
 <link rel="stylesheet" href="${static.url('css/hands_on_practical/hands_on_practical.css')}">
 </%block>
 
-
 <div id='calendar'></div>
 
 
@@ -20,22 +19,58 @@
 <script src="https://unpkg.com/@fullcalendar/daygrid@4.3.0/main.min.js"></script>
 <script src="https://unpkg.com/@fullcalendar/timegrid@4.3.0/main.min.js"></script>
 
+<!-- to display data on [hover,click,etc] -->
+<script src="https://unpkg.com/popper.js/dist/umd/popper.min.js"></script>
+<script src="https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js"></script>
+
+<!-- to change language of calendar -->
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@4.4.2/locales-all.min.js"></script>
+
+<!-- to list all events at once -->
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/list@4.4.2/main.min.js"></script>
+
+
 <script>
 
   document.addEventListener('DOMContentLoaded', function () {
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
-        plugins: ['interaction', 'dayGrid', 'timeGrid'],
-        initialView: 'dayGridMonth',
-        eventOrder: "sort",
-        events: '/hands-on-practical/api/${course_id}/events-data/',
+        plugins: ['interaction', 'dayGrid', 'timeGrid', 'list'],
+        header: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridMonth,timeGridDay'
+        },
+        buttonIcons: false, // show the prev/next text
+        weekNumbers: true,
+        // eventOrder: "sort",
+        locale: 'en',   // language of the calendar
+        events: '/hands-on-practical/api/${course_id}/events-data',
+        eventColor: 'blue',
         eventSources:[
             {
-                // url: "/hands-on-practical/api/student-data/",
-                color: "yellow",
+                url: "/hands-on-practical/api/${course_id}/maximum-students",
+                color: "red",
                 textColor: "black",
             },
         ],
+        eventRender: function(info) {
+            var tooltip = new Tooltip(info.el, {
+                title: info.event.extendedProps.description,
+                placement: 'top',
+                trigger: 'hover',
+                container: 'body',
+                html: true
+            })
+        },
+        eventClick: function(info){
+            info.jsEvent.preventDefault();
+            var eventObj = info.event
+
+            if (eventObj.url){
+                window.open(eventObj.url)
+            }
+        }
     });
     calendar.render();
 });
