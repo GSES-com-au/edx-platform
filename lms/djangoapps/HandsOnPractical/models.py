@@ -40,7 +40,7 @@ class FormFillingDate(TimeStampedModel):
 
 
 class StudentConsultationList(TimeStampedModel):
-    practical_name = models.ForeignKey(FormFillingDate, on_delete=models.CASCADE, default='1')
+    practical_name = models.ForeignKey(FormFillingDate, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=50)
     email = models.EmailField()
     phone_number = models.CharField(max_length=10)
