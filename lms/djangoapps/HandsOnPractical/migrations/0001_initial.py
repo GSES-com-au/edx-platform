@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('course_overviews', '0028_auto_20220503_0945'),
+        ('nea_pathways', '0019_alter_courseprice_php'),
     ]
 
     operations = [

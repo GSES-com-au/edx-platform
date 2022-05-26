@@ -26,15 +26,29 @@ class StudentRegistrationForm(LoginRequiredMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(StudentRegistrationForm, self).get_context_data(**kwargs)
+        course = CourseOverview.get_from_id(kwargs['course_id'])
+
+        email = self.request.user.email
 
         try:
-            practical_course = CoursePracticalDate.objects.filter(courseoverview=kwargs['course_id']).values()
-            queryset = FormFillingDate.objects.filter(courseoverview=practical_course[0].get('id'))
-        except:
-            queryset = None
+            user_exist_data = StudentConsultationList.objects.get(email=email)
 
-        course = CourseOverview.get_from_id(kwargs['course_id'])
-        context.update({'course_id': kwargs['course_id'], 'course': course, 'queryset': queryset})
+            if user_exist_data:
+                user_exist_flag = True
+                queryset = None
+        except:
+            user_exist_flag = False
+            try:
+                practical_course = CoursePracticalDate.objects.filter(courseoverview=kwargs['course_id']).values()
+                queryset = FormFillingDate.objects.filter(courseoverview=practical_course[0].get('id'))
+            except:
+                queryset = None
+
+        context = {
+            'course': course,
+            'queryset': queryset,
+            'user_exist_data': user_exist_flag
+        }
 
         return context
 

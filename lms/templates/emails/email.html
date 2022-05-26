@@ -9,6 +9,22 @@
 		div {
 			margin-top: 20px;
 		}
+		/* .what-to-bring, .reschedules{
+			background-color: #3c708e; 
+			width: 45%;
+			color: white;
+		} */
+		/* .bring-items{
+			margin-right: 30%;
+		}
+		.bring-items ul{
+			text-align: start;
+			margin-left: 42%;
+		}
+		.div-reschedules p{
+			width: 45%;
+			text-align: left;
+		} */
 	</style>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -24,13 +40,37 @@
 				<!-- 600px container (white background) -->
 				<table class="cn-container">
 					<div class="container">
-						<h4>Hi {{user}}</h4>
+						<h3>Hi {{user}}</h3>
 						<h3>Thank you for booking into {{practical_name}}. The Details are as below</h3>
 						<p>
 							<h3><strong>Dates</strong>: {{ start_date }} to {{end_date}}</h3>
 							<h3><strong>Time</strong>: {{ start_time }} to {{ end_time }}</h3><br><br>
 							<h3><strong>Venue</strong>: {{venue}}</h3>
 						</p>
+					</div>
+					<div class="div-what-to-bring">
+						<h1 class="what-to-bring" style="background-color:#3c708e; width: 45%; color: white;">What to bring</h1>
+							<h4><strong>Please bring the following:</strong></h4>
+							<ul style="width: 45%; text-align: left;">
+								<li>Enclosed shoes</li>
+								<li>Hat and sunglasses</li>
+								<li>Appropriate work clothes</li>
+								<li>Calculator</li>
+								<li>Laptop with Microsoft Excel or similar to assist with calculations (please contactus if you are unable to bring a laptop)</li>
+							</ul>
+							<h4><strong>Lunch Will Be Provided</strong></h4>
+					</div><br>
+
+					<div class="div-reschedules">
+						<h1 class="reschedules" style="background-color:#3c708e; width: 45%; color: white;">RESCHEDULES</h1>
+						<p style="width: 45%; text-align: left;">Practical dates can be changed, however we need fourteen (14) days' notice to effect the change. Email or call us to reschedule.</p>
+						<p style="width: 45%; text-align: left;">If sufficient notice is not given then an admin fee may apply to change the practical dates.</p>
+						<p style="width: 45%; text-align: left;">Practical sessions are subject to minimum numbers. GSES will advise with at least 14
+						days' notice if a session is to be cancelled. If you need to book flights or 
+						accommodation, we strongly recommend not booking 14 days or more before the 
+						start date or booking flexible tickets.</p>
+						<p style="width: 45%; text-align: left;">Please do not hesitate to contact us during business hours if you require any
+							assistance or further information. We look forward to seeing you!</p>
 					</div>
 					<!-- <tr>
 						<td class="container-padding" bgcolor="#ffffff"

@@ -43,15 +43,16 @@
         },
         buttonIcons: false, // show the prev/next text
         weekNumbers: true,
-        // eventOrder: "sort",
+        eventOrder: "sort",
         locale: 'en',   // language of the calendar
         events: '/hands-on-practical/api/${course_id}/events-data',
         eventColor: 'blue',
+        eventTextColor: "white",
         eventSources:[
             {
                 url: "/hands-on-practical/api/${course_id}/maximum-students",
-                color: "red",
-                textColor: "black",
+                color: "#3c708e",
+                textColor: "white",
             },
         ],
         eventRender: function(info) {

@@ -21,6 +21,8 @@ rel='stylesheet'>
 
 
 % if course.show_consultation_form:
+
+    
     <main id="main" aria-label="Content" tabindex="-1">
 
         <div class="container-fluid">
@@ -60,7 +62,11 @@ rel='stylesheet'>
             <h4 class="already-registered">You Have Already Registered For the event</h4>
             <h4 class="seat-fulled">Seats Are Full In These Practical</h4>
             <h4 class="student-registered">Thank You for registering</h4>
-            
+
+            % if user_exist_data:
+                <h1>You Have Already Registered For The Practical</h1>
+
+            % else:
             <form id="registration-form" >
                 <div class="form-group container-fluid">
                     <label for="fullName">Full Name</label>
@@ -126,7 +132,7 @@ rel='stylesheet'>
 
         </div><br><br><br>
     </main>
-
+    % endif
 
 % else:
     <h1>These Feature is Not Currently Available</h1>
