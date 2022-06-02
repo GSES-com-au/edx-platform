@@ -50,7 +50,7 @@
                 {% blocktrans trimmed asvar assist_msg %}
                 If you need help, please email us at {start_anchor_email}{{ admin@newenergyacademy.com }}{end_anchor}.
                 {% endblocktrans %}
-                {% interpolate_html assist_msg start_anchor_web='<a href="'|add:support_url|add:'">'|safe start_anchor_email='<a href="mailto:'|add:support_email|add:'">'|safe end_anchor='</a>'|safe %}
+                {% interpolate_html assist_msg start_anchor_web='<a href="'|add:support_url|add:'">'|safe start_anchor_email='<a href="mailto:'|add:admin@newenergyacademy.com|add:'">'|safe end_anchor='</a>'|safe %}
                 <br />
             </p>
         </td>
