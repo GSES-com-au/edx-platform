@@ -47,10 +47,7 @@
     </tr>
         <td>
             <p style="color: rgba(0,0,0,.75);">
-                {% blocktrans trimmed asvar assist_msg %}
-                If you need help, please email us at {start_anchor_email}{{ admin@newenergyacademy.com }}{end_anchor}.
-                {% endblocktrans %}
-                {% interpolate_html assist_msg start_anchor_web='<a href="'|add:support_url|add:'">'|safe start_anchor_email='<a href="mailto:'|add:admin@newenergyacademy.com|add:'">'|safe end_anchor='</a>'|safe %}
+                If you need help, please email us at <a href="mailto:admin@newenergyacademy.com">admin@newenergyacademy.com</a>.                
                 <br />
             </p>
         </td>
