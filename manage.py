@@ -104,3 +104,8 @@ if __name__ == "__main__":
 
     from django.core.management import execute_from_command_line
     execute_from_command_line([sys.argv[0]] + django_args)
+
+from django.contrib.auth.models import User
+u=User.objects.get(email='us...@example.com'); 
+[obj.delete() for obj in u.preferences.all()];
+u.delete()
