@@ -67,6 +67,13 @@ from xmodule.tabs import CourseTab
 from .. import permissions
 from ..toggles import data_download_v2_is_enabled
 from .tools import get_units_with_due_date, title_or_url
+from lms.djangoapps.HandsOnPractical.models import CoursePracticalDate, FormFillingDate, StudentConsultationList
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.http import JsonResponse
+from django.http.response import HttpResponse
+import json
+
 
 log = logging.getLogger(__name__)
 
@@ -101,6 +108,28 @@ def show_analytics_dashboard_message(course_key):
         return settings.ANALYTICS_DASHBOARD_URL and ccx_analytics_enabled
 
     return settings.ANALYTICS_DASHBOARD_URL
+
+def _show_hands_on_practical(course,course_key):
+    """ Display the hands on practical """
+    try:
+        course_practical_date = CoursePracticalDate.objects.filter(courseoverview=course_key).exists()
+        if course_practical_date:
+            try:
+                object_course_practical_date = CoursePracticalDate.objects.filter(courseoverview=course_key).first()
+                form_data = FormFillingDate.objects.filter(courseoverview=object_course_practical_date)
+                section_data = {"section_key": "HandsOnPractical",
+                "section_display_name": _('Hands On Practical'),
+                "course_key": str(course.id),
+                "form_data": form_data
+                }
+                return section_data
+            except Exception as e:
+                print(f"An error has occurred. {e}")
+        else:
+            return {"error_msg":"No data to display"}
+
+    except Exception as e:
+        logging.info(e)
 
 
 @ensure_csrf_cookie
@@ -236,6 +265,7 @@ def instructor_dashboard_2(request, course_id):  # lint-amnesty, pylint: disable
     )
 
     certificate_invalidations = CertificateInvalidation.get_certificate_invalidations(course_key)
+    sections.append(_show_hands_on_practical(course,course_key))
 
     context = {
         'course': course,
@@ -765,3 +795,19 @@ def is_ecommerce_course(course_key):
     """
     sku_count = len([mode.sku for mode in CourseMode.modes_for_course(course_key) if mode.sku])
     return sku_count > 0
+
+
+@api_view(['GET','POST'])
+def get_student_data(request):
+    variable_column = 'practical_name_id'
+    for key in list(request.data.keys()):
+        search_type = key
+    filter = variable_column + '__' + search_type
+    results=StudentConsultationList.objects.filter(**{filter:request.data[key]}).values()
+    if results:
+        for entry in results:
+            prac_name=FormFillingDate.objects.get(id=entry['practical_name_id']).practical_name
+            entry['practical_name']=prac_name
+    else:
+        return Response("None")
+    return Response(results)

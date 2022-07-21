@@ -1,0 +1,120 @@
+<%page args="section_data" expression_filter="h"/>
+<%!
+from django.utils.translation import ugettext as _
+%>
+
+<form class="form">
+        <input id="csrf_token" type="hidden" name="csrfmiddlewaretoken" value="${csrf_token}"/>
+        <div class="col-lg-4">
+          <select name="practical" id="practical" class="form-control">
+           <option value="" selected disabled>Select Practical</option> 
+             % for i in section_data['form_data']:
+               <option value="${i.practical_name}" >${i.practical_name}</option>
+              %endfor
+          </select>
+        </div>
+         <div class="col-lg-4">
+          <select name="venue" id="venue" class="form-control">
+           <option value="" selected disabled>Select Venue</option>
+             % for i in section_data['form_data']:
+               <option value="${i.venue}" >${i.venue}</option>
+              %endfor
+          </select>
+        </div>
+         <div class="col-lg-4">
+          <select name="start-date" id="start-date" class="form-control">
+           <option value="" selected disabled>Select Date</option>
+             % for i in section_data['form_data']:
+               <option value="${i.start_date}" >${i.start_date.strftime('%Y-%m-%d')}</option>
+              %endfor
+          </select>
+        </div>
+          <div class="col-lg-4">
+           <button type="submit" class="btn btn-primary">Filter</button>
+           <button type="reset" class="btn btn-primary">Reset</button>
+        </div>
+</form>
+
+<div class="result-container">
+<h2>Filter Result</h2>
+        <table id="filter-result">
+          <thead>
+            <tr>
+              <th>Practical Name</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Other requirments</th>
+              <th>Other comments</th>
+            </tr>
+          </thead>
+          <tbody><tr><td colspan="6">Search For Data</td><td></td></tr></tbody>
+        </table>
+
+</div>
+
+<script type="text/javascript">
+var key_val = "";
+
+function filterChange(){
+    const venue=document.querySelector('#venue');
+    const date=document.querySelector('#start-date');
+    const practical=document.querySelector('#practical');
+if(venue.value){
+        date.disabled=true;
+        practical.disabled=true;
+        key_val = "venue" 
+}else if(date.value){
+         venue.disabled=true;
+         practical.disabled=true;
+         key_val = "start_date"
+}else if(practical.value){
+         venue.disabled=true;
+         date.disabled=true;
+         key_val = "practical_name"
+}}
+document.querySelector('#venue').addEventListener('change',()=>filterChange())
+document.querySelector('#start-date').addEventListener('change',()=>filterChange())
+document.querySelector('#practical').addEventListener('change',()=>filterChange())
+
+function reset(){
+   document.querySelector('#venue').disabled=false;
+   document.querySelector('#start-date').disabled=false;
+   document.querySelector('#practical').disabled=false; 
+}
+
+document.querySelector('button[type=reset]').addEventListener('click',()=>reset())
+
+async function filterData(){
+ 
+    const venue=document.querySelector('#venue');
+    const date=document.querySelector('#start-date');
+    const practical=document.querySelector('#practical');
+    const csrf = document.querySelector('#csrf_token').value;
+    const key_val_send = key_val
+    let html = ''
+    const rawResponse = await fetch('https://lms1.gsesdev.com/handsonpractical', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'X-CSRFToken' : csrf
+    },
+    body: JSON.stringify({[key_val] : venue.value || date.value || practical.value})
+  });
+    const content = await rawResponse.json();
+    if(content==="None"){
+        html ='<tr><td colspan="6">No Data Availaible<td></tr>'
+    }
+    else if(content.length>0){
+        content.map((item,k)=>{
+          html+='<tr><td>'+item.practical_name+'</td><td>'+item.full_name+'</td><td>'+item.email+'</td></td><td>'+item.contact_phone_number+'</td><td>'+item.other_requirements+'</td><td>'+item.other_comments+'</td></tr>';
+        })
+    }else{
+        html ='<tr><td colspan="6">No Data Availaible<td></tr>'
+    }
+        document.querySelector('#filter-result tbody').innerHTML=html
+    
+}
+document.querySelector('button[type=submit]').addEventListener('click',e=>{e.preventDefault(),filterData()})
+</script>
