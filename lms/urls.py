@@ -543,6 +543,12 @@ urlpatterns += [
     ),
 
     re_path(
+        r'^handsonpractical$',
+        instructor_dashboard_views.get_student_data,
+        name='get_student_data',
+    ),
+
+    re_path(
         r'^courses/{}/set_course_mode_price$'.format(
             settings.COURSE_ID_PATTERN,
         ),
