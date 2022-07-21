@@ -3,7 +3,58 @@
 from django.utils.translation import ugettext as _
 %>
 
+<style>
+.row {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+.col-lg-4 {
+    width: 25%;
+}
+
+.col-lg-4 select {
+    width: 95%;
+    height: 43px;
+    margin-right: 20px;
+}
+
+.result-container {
+    display: block;
+    margin-top: 20px;
+}
+
+.result-container h2 {
+    margin-bottom: 10px;
+    font-size: 1.35em;
+    font-weight: 400;
+    line-height: 1.4em;
+    color: #fff;
+}
+
+table#filter-result {
+    width: 100%;
+    /* border: 1px solid #ccc; */
+}
+
+table#filter-result thead tr th {
+    border: 1px solid;
+    text-align: center;
+    padding: 13px;
+}
+
+table#filter-result tbody tr td {
+    background: #25314b;
+    text-align: left;
+    font-size: 13px;
+    border: 1px solid #fff;
+    padding: 10px;
+}
+</style>
+
+
 <form class="form">
+        <div class="row">
         <input id="csrf_token" type="hidden" name="csrfmiddlewaretoken" value="${csrf_token}"/>
         <div class="col-lg-4">
           <select name="practical" id="practical" class="form-control">
@@ -33,6 +84,7 @@ from django.utils.translation import ugettext as _
            <button type="submit" class="btn btn-primary">Filter</button>
            <button type="reset" class="btn btn-primary">Reset</button>
         </div>
+        </div>
 </form>
 
 <div class="result-container">
@@ -48,7 +100,7 @@ from django.utils.translation import ugettext as _
               <th>Other comments</th>
             </tr>
           </thead>
-          <tbody><tr><td colspan="6">Search For Data</td><td></td></tr></tbody>
+          <tbody><tr><td colspan="6">Search For Data</td></tr></tbody>
         </table>
 
 </div>
@@ -83,8 +135,7 @@ function reset(){
    document.querySelector('#practical').disabled=false; 
 }
 
-document.querySelector('button[type=reset]').addEventListener('click',()=>reset())
-
+document.querySelector('button[type=reset]').addEventListener('click',()=>{reset(),document.querySelector('#filter-result tbody').innerHTML='<tr><td colspan="6">Search For Data</td></tr>'})
 async function filterData(){
  
     const venue=document.querySelector('#venue');
@@ -104,14 +155,14 @@ async function filterData(){
   });
     const content = await rawResponse.json();
     if(content==="None"){
-        html ='<tr><td colspan="6">No Data Availaible<td></tr>'
+        html ='<tr><td colspan="6">No Data Availaible</td></tr>'
     }
     else if(content.length>0){
         content.map((item,k)=>{
-          html+='<tr><td>'+item.practical_name+'</td><td>'+item.full_name+'</td><td>'+item.email+'</td></td><td>'+item.contact_phone_number+'</td><td>'+item.other_requirements+'</td><td>'+item.other_comments+'</td></tr>';
+          html+='<tr><td>'+item.practical_name+'</td><td>'+item.full_name+'</td><td>'+item.email+'</td><td>'+item.contact_phone_number+'</td><td>'+item.other_requirements+'</td><td>'+item.other_comments+'</td></tr>';
         })
     }else{
-        html ='<tr><td colspan="6">No Data Availaible<td></tr>'
+        html ='<tr><td colspan="6">No Data Availaible</td></tr>'
     }
         document.querySelector('#filter-result tbody').innerHTML=html
     
