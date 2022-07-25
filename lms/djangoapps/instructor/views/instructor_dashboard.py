@@ -126,7 +126,8 @@ def _show_hands_on_practical(course,course_key):
             except Exception as e:
                 print(f"An error has occurred. {e}")
         else:
-            return {"error_msg":"No data to display"}
+            logging.info("No Practical data found for the course")
+            return None
 
     except Exception as e:
         logging.info(e)
@@ -265,7 +266,10 @@ def instructor_dashboard_2(request, course_id):  # lint-amnesty, pylint: disable
     )
 
     certificate_invalidations = CertificateInvalidation.get_certificate_invalidations(course_key)
-    sections.append(_show_hands_on_practical(course,course_key))
+    section_practical_data = _show_hands_on_practical(course,course_key)
+    if section_practical_data is not None:
+        sections.append(section_practical_data)
+    #sections.append(_show_hands_on_practical(course,course_key)) if _show_hands_on_practical(course,course_key) is not None
 
     context = {
         'course': course,
