@@ -38,7 +38,7 @@ class Command(BaseCommand):
         """
         Execute the command
         """
-        users_to_exclude=['audit','discovery_worker','ecommerce_worker','edx','enterprise_worker','honor', 'login_service_user','retirement_service_worker', 'staff', 'verified']
+        users_to_exclude=['audit','discovery_worker','ecommerce_worker','edx','enterprise_worker','honor', 'login_service_user','retirement_service_worker']
 
         if options['exclude']:
             exclude_users=options['exclude']
