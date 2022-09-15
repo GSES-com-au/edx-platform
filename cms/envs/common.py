@@ -301,7 +301,7 @@ FEATURES = {
     'ALLOW_COURSE_RERUNS': True,
 
     # Certificates Web/HTML Views
-    'CERTIFICATES_HTML_VIEW': False,
+    'CERTIFICATES_HTML_VIEW': True,
 
     # Teams feature
     'ENABLE_TEAMS': True,
@@ -487,11 +487,11 @@ LIBRARY_AUTHORING_MICROFRONTEND_URL = None
 ############################# SOCIAL MEDIA SHARING #############################
 SOCIAL_SHARING_SETTINGS = {
     # Note: Ensure 'CUSTOM_COURSE_URLS' has a matching value in lms/envs/common.py
-    'CUSTOM_COURSE_URLS': False,
-    'DASHBOARD_FACEBOOK': False,
-    'CERTIFICATE_FACEBOOK': False,
-    'CERTIFICATE_TWITTER': False,
-    'DASHBOARD_TWITTER': False
+    'CUSTOM_COURSE_URLS': True,
+    'DASHBOARD_FACEBOOK': True,
+    'CERTIFICATE_FACEBOOK': True,
+    'CERTIFICATE_TWITTER': True,
+    'DASHBOARD_TWITTER': True
 }
 
 SOCIAL_MEDIA_FOOTER_URLS = {}
